@@ -131,11 +131,28 @@ export class WritingDashboardView extends ItemView {
 			<div class="fw-card-footer">Tempo total cronometrado</div>
 		`;
 
-		// Seção de ações rápidas
-		const actionsSection = container.createDiv('actions-section');
-		actionsSection.createEl('h3', { text: 'Ações Rápidas' });
-
-		const actionsGrid = actionsSection.createDiv('actions-grid');
+		// Seção combinada: Tempo Focado + Ações Rápidas
+		const combinedSection = container.createDiv('combined-section');
+		
+		// Painel de Tempo Focado (lado esquerdo)
+		const focusTimePanel = combinedSection.createDiv('focus-time-panel');
+		focusTimePanel.createEl('h3', { text: 'Tempo Focado' });
+		const focusTimeContent = focusTimePanel.createDiv('focus-time-content');
+		focusTimeContent.innerHTML = `
+			<div class="focus-time-display">
+				<div class="focus-time-main">${this.formatTime(this.sessionTimer)}</div>
+				<div class="focus-time-label">Tempo total cronometrado</div>
+			</div>
+			<div class="focus-time-controls">
+				<button id="fw-timer-start-focus" class="focus-timer-btn">${this.sessionActive ? 'Pausar' : 'Iniciar'}</button>
+				<button id="fw-timer-reset-focus" class="focus-timer-btn">Reset</button>
+			</div>
+		`;
+		
+		// Painel de Ações Rápidas (lado direito)
+		const actionsPanel = combinedSection.createDiv('actions-panel');
+		actionsPanel.createEl('h3', { text: 'Ações Rápidas' });
+		const actionsGrid = actionsPanel.createDiv('actions-grid');
 
 		// Botão para criar página fixa
 		const createPageBtn = actionsGrid.createEl('button', {
@@ -165,6 +182,23 @@ export class WritingDashboardView extends ItemView {
 			await this.plugin.countAllActiveWords();
 			this.renderDashboard(container);
 		});
+		
+		// Adicionar event listeners para os botões do timer focado
+		setTimeout(() => {
+			document.getElementById('fw-timer-start-focus')?.addEventListener('click', () => {
+				if (this.sessionActive) {
+					this.pauseSessionTimer();
+					document.getElementById('fw-timer-start-focus')!.textContent = 'Iniciar';
+				} else {
+					this.startSessionTimer();
+					document.getElementById('fw-timer-start-focus')!.textContent = 'Pausar';
+				}
+			});
+			document.getElementById('fw-timer-reset-focus')?.addEventListener('click', () => {
+				this.resetSessionTimer();
+				document.getElementById('fw-timer-start-focus')!.textContent = 'Iniciar';
+			});
+		}, 0);
 
 		// Seção de histórico recente
 		const historySection = container.createDiv('history-section');
@@ -359,6 +393,81 @@ export class WritingDashboardView extends ItemView {
 				font-weight: 600;
 			}
 
+			.combined-section {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 1.5em;
+				margin-bottom: 2vw;
+			}
+			
+			@media (max-width: 768px) {
+				.combined-section {
+					grid-template-columns: 1fr;
+				}
+			}
+			
+			.focus-time-panel, .actions-panel {
+				padding: 1.2em 1em;
+				background: linear-gradient(135deg, var(--background-secondary) 0%, var(--background-modifier-border) 100%);
+				border-radius: 1em;
+				box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
+				border: 1px solid var(--background-modifier-border);
+			}
+			
+			.focus-time-panel h3, .actions-panel h3 {
+				margin: 0 0 1em 0;
+				color: var(--text-normal);
+				font-size: 1.1em;
+				font-weight: 700;
+			}
+			
+			.focus-time-content {
+				display: flex;
+				flex-direction: column;
+				gap: 1em;
+			}
+			
+			.focus-time-display {
+				text-align: center;
+			}
+			
+			.focus-time-main {
+				font-size: 2.5em;
+				font-weight: 800;
+				color: var(--text-normal);
+				margin-bottom: 0.3em;
+			}
+			
+			.focus-time-label {
+				font-size: 0.9em;
+				color: var(--text-muted);
+				font-weight: 500;
+			}
+			
+			.focus-time-controls {
+				display: flex;
+				gap: 0.5em;
+				justify-content: center;
+			}
+			
+			.focus-timer-btn {
+				padding: 0.6em 1.2em;
+				border-radius: 0.6em;
+				border: none;
+				background: var(--background-modifier-border);
+				color: var(--text-normal);
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.2s ease;
+				font-size: 0.9em;
+			}
+			
+			.focus-timer-btn:hover {
+				background: var(--interactive-accent);
+				color: var(--text-on-accent);
+				transform: translateY(-1px);
+			}
+
 			.actions-section {
 				margin-bottom: 2vw;
 				padding: 1.2em 1em;
@@ -530,7 +639,9 @@ export class WritingDashboardView extends ItemView {
 	}
 	private updateSessionTimerUI() {
 		const timerEl = document.getElementById('fw-session-timer');
+		const focusTimerEl = document.querySelector('.focus-time-main');
 		if (timerEl) timerEl.textContent = this.formatTime(this.sessionTimer);
+		if (focusTimerEl) focusTimerEl.textContent = this.formatTime(this.sessionTimer);
 		// Salvar no plugin
 		this.plugin.metrics.sessionTimer = this.sessionTimer;
 		this.plugin.metrics.sessionActive = this.sessionActive;

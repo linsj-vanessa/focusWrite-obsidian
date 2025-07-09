@@ -5,6 +5,13 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.2] - 2024-01-XX
+
+### Adicionado
+- **Layout melhorado do dashboard**: Painel de tempo focado e ações rápidas agora ficam lado a lado em uma seção combinada
+- **Design responsivo**: Em telas menores, os painéis se empilham verticalmente para melhor usabilidade
+- **Timer dedicado**: Painel de tempo focado com display maior e controles centralizados
+
 ## [1.0.1] - 2024-01-XX
 
 ### Alterado
