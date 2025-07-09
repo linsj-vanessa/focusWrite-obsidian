@@ -1,0 +1,10 @@
+{
+  "id": "focus-write",
+  "name": "Focus Write",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Dashboard de métricas para escritores - acompanhe sua produtividade, sequências e conquistas",
+  "author": "Vanessa Lins",
+  "authorUrl": "https://github.com/seu-usuario",
+  "isDesktopOnly": false
+} 
