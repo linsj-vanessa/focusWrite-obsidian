@@ -128,6 +128,24 @@ export class WritingDashboardView extends ItemView {
 		`;
 
 
+		// Seção do foco do dia (em cima da seção combinada)
+		if (this.plugin.metrics.dailyFocus) {
+			const focusSection = container.createDiv('focus-section');
+			focusSection.createEl('h3', { text: '🎯 Foco do Dia' });
+			const focusContent = focusSection.createDiv('focus-content');
+			
+			const focusText = focusContent.createDiv('focus-text');
+			focusText.textContent = this.plugin.metrics.dailyFocus;
+			
+			const editBtn = focusContent.createEl('button', {
+				text: 'Editar',
+				cls: 'focus-edit-btn'
+			});
+			editBtn.addEventListener('click', async () => {
+				await this.plugin.openDailyFocusModal();
+			});
+		}
+
 		// Seção combinada: Tempo Total Focado + Ações Rápidas
 		const combinedSection = container.createDiv('combined-section');
 		
@@ -161,26 +179,6 @@ export class WritingDashboardView extends ItemView {
 		setFocusBtn.addEventListener('click', async () => {
 			await this.plugin.openDailyFocusModal();
 		});
-		
-
-
-		// Seção do foco do dia
-		if (this.plugin.metrics.dailyFocus) {
-			const focusSection = container.createDiv('focus-section');
-			focusSection.createEl('h3', { text: '🎯 Foco do Dia' });
-			const focusContent = focusSection.createDiv('focus-content');
-			
-			const focusText = focusContent.createDiv('focus-text');
-			focusText.textContent = this.plugin.metrics.dailyFocus;
-			
-			const editBtn = focusContent.createEl('button', {
-				text: 'Editar',
-				cls: 'focus-edit-btn'
-			});
-			editBtn.addEventListener('click', async () => {
-				await this.plugin.openDailyFocusModal();
-			});
-		}
 
 		// Seção de histórico recente
 		const historySection = container.createDiv('history-section');

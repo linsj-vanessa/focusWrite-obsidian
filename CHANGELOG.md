@@ -5,6 +5,12 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.9] - 2024-01-XX
+
+### Alterado
+- **Reorganização do layout**: Widget do foco do dia movido para cima da seção combinada (tempo focado + ações rápidas)
+- **Melhor hierarquia visual**: Foco do dia agora tem destaque maior no dashboard
+
 ## [1.0.8] - 2024-01-XX
 
 ### Alterado
