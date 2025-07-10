@@ -5,6 +5,12 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.6] - 2024-01-XX
+
+### Adicionado
+- **Novo logo**: Ícone de lápis de escrita a tinta no header do dashboard
+- **Identidade visual**: Logo mais representativo para o plugin de escrita
+
 ## [1.0.5] - 2024-01-XX
 
 ### Alterado

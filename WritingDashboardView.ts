@@ -66,7 +66,10 @@ export class WritingDashboardView extends ItemView {
 		// Header estilo writer-dashboard
 		const header = container.createDiv('dashboard-header');
 		const iconDiv = header.createDiv('fw-header-icon');
-		iconDiv.innerHTML = `<svg width="32" height="32" fill="none" viewBox="0 0 24 24"><path d="M19.5 5.5l-15 13M19.5 5.5l-5.5 13M19.5 5.5l-13 5.5" stroke="var(--interactive-accent)" stroke-width="2" stroke-linecap="round"/></svg>`;
+		iconDiv.innerHTML = `<svg width="32" height="32" fill="none" viewBox="0 0 24 24">
+			<path d="M17 3C17.2626 2.73741 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73741 21 3C21.2626 3.26259 21.471 3.57444 21.6131 3.9176C21.7553 4.26076 21.8284 4.62856 21.8284 5C21.8284 5.37144 21.7553 5.73924 21.6131 6.0824C21.471 6.42556 21.2626 6.73741 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="var(--interactive-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+			<path d="M15 5L19 9" stroke="var(--interactive-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+		</svg>`;
 		const titleDiv = header.createDiv('fw-header-title');
 		titleDiv.createEl('h1', { text: 'Focus Write' });
 		titleDiv.createEl('p', { text: `Projeto: ${this.plugin.metrics?.projectName || 'Meu Projeto'}` });
