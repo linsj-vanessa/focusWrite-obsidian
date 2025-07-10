@@ -123,13 +123,7 @@ export class WritingDashboardView extends ItemView {
 			<div class="fw-card-main"><span class="fw-card-main-big">${this.plugin.metrics.totalWords.toLocaleString()}</span></div>
 			<div class="fw-card-footer">Média: ${Math.round(this.plugin.metrics.totalWords / Math.max(1,Object.keys(this.plugin.metrics.wordCounts).length))}/dia</div>
 		`;
-		// Card 5: Tempo Focado
-		const cardFocusTime = statsGrid.createDiv('fw-stat-card');
-		cardFocusTime.innerHTML = `
-			<div class="fw-card-header"><span class="fw-card-icon">🕒</span> <span class="fw-card-title">Tempo Focado</span></div>
-			<div class="fw-card-main"><span class="fw-card-main-big">${this.formatTime(this.sessionTimer)}</span></div>
-			<div class="fw-card-footer">Tempo total cronometrado</div>
-		`;
+
 
 		// Seção combinada: Tempo Total Focado + Ações Rápidas
 		const combinedSection = container.createDiv('combined-section');
