@@ -34,13 +34,13 @@ export class WritingDashboardView extends ItemView {
 		this.sessionActive = this.plugin.metrics.sessionActive || false;
 		if (this.sessionActive) this.startSessionTimer();
 		container.createEl('h4', { text: 'Dashboard de Escrita' });
-		this.renderDashboard(container);
+		await this.renderDashboard(container);
 
 		// Escutar evento customizado para atualizar dashboard automaticamente
-		this._metricsListener = () => {
+		this._metricsListener = async () => {
 			container.empty();
 			container.createEl('h4', { text: 'Dashboard de Escrita' });
-			this.renderDashboard(container);
+			await this.renderDashboard(container);
 		};
 		window.addEventListener('dashboard-metrics-updated', this._metricsListener);
 	}
@@ -52,12 +52,12 @@ export class WritingDashboardView extends ItemView {
 		}
 	}
 
-	renderDashboard(container: any): void {
+	async renderDashboard(container: any): Promise<void> {
 		const dashboardContainer = container.createDiv('writing-dashboard-container');
-		this.createFunctionalDashboard(dashboardContainer);
+		await this.createFunctionalDashboard(dashboardContainer);
 	}
 
-	createFunctionalDashboard(container: any): void {
+	async createFunctionalDashboard(container: any): Promise<void> {
 		const metrics = this.plugin.getMetrics();
 		const today = new Date().toISOString().split('T')[0];
 		const todayWords = metrics.wordCounts[today] || 0;
@@ -135,9 +135,15 @@ export class WritingDashboardView extends ItemView {
 		const focusTimePanel = combinedSection.createDiv('focus-time-panel');
 		focusTimePanel.createEl('h3', { text: 'Tempo Total Focado' });
 		const focusTimeContent = focusTimePanel.createDiv('focus-time-content');
+		
+		// Carregar tempo total focado
+		const totalFocusTime = await this.plugin.getTotalFocusTime();
+		const currentSessionTime = this.sessionActive ? this.sessionTimer : 0;
+		const displayTime = totalFocusTime + currentSessionTime;
+		
 		focusTimeContent.innerHTML = `
 			<div class="focus-time-display">
-				<div class="focus-time-main">${this.formatTime(this.sessionTimer)}</div>
+				<div class="focus-time-main">${this.formatTime(displayTime)}</div>
 				<div class="focus-time-label">Tempo total acumulado</div>
 			</div>
 		`;
@@ -163,7 +169,7 @@ export class WritingDashboardView extends ItemView {
 		});
 		countWordsBtn.addEventListener('click', async () => {
 			await this.plugin.countTodayWords();
-			this.renderDashboard(container);
+			await this.renderDashboard(container);
 		});
 
 		// Botão para contar todas as palavras
@@ -173,7 +179,7 @@ export class WritingDashboardView extends ItemView {
 		});
 		countAllWordsBtn.addEventListener('click', async () => {
 			await this.plugin.countAllActiveWords();
-			this.renderDashboard(container);
+			await this.renderDashboard(container);
 		});
 
 		// Botão para definir foco do dia
@@ -653,32 +659,54 @@ export class WritingDashboardView extends ItemView {
 	private startSessionTimer() {
 		if (!this.sessionActive) {
 			this.sessionActive = true;
-			this.sessionInterval = setInterval(() => {
+			this.sessionInterval = setInterval(async () => {
 				this.sessionTimer++;
-				this.updateSessionTimerUI();
+				await this.updateSessionTimerUI();
 			}, 1000);
 		}
 	}
-	private pauseSessionTimer() {
+	private async pauseSessionTimer() {
 		if (this.sessionActive) {
 			this.sessionActive = false;
 			clearInterval(this.sessionInterval);
+			await this.updateSessionTimerUI();
 		}
 	}
-	private resetSessionTimer() {
-		this.pauseSessionTimer();
+	private async resetSessionTimer() {
+		// Adicionar o tempo atual ao total antes de resetar
+		if (this.sessionTimer > 0) {
+			await this.plugin.addToTotalFocusTime(this.sessionTimer);
+		}
+		
+		await this.pauseSessionTimer();
 		this.sessionTimer = 0;
 		this.sessionActive = false;
-		this.updateSessionTimerUI();
+		await this.updateSessionTimerUI();
+		
+		// Atualizar o dashboard para mostrar o novo tempo total
+		const container = this.containerEl;
+		if (container) {
+			container.empty();
+			container.createEl('h4', { text: 'Dashboard de Escrita' });
+			await this.renderDashboard(container);
+		}
 	}
-	private updateSessionTimerUI() {
+	private async updateSessionTimerUI() {
 		const timerEl = document.getElementById('fw-session-timer');
-		const focusTimerEl = document.querySelector('.focus-time-main');
 		if (timerEl) timerEl.textContent = this.formatTime(this.sessionTimer);
-		if (focusTimerEl) focusTimerEl.textContent = this.formatTime(this.sessionTimer);
+		
+		// Atualizar o painel de tempo total focado
+		const focusTimerEl = document.querySelector('.focus-time-main');
+		if (focusTimerEl) {
+			const totalFocusTime = await this.plugin.getTotalFocusTime();
+			const currentSessionTime = this.sessionActive ? this.sessionTimer : 0;
+			const displayTime = totalFocusTime + currentSessionTime;
+			focusTimerEl.textContent = this.formatTime(displayTime);
+		}
+		
 		// Salvar no plugin
 		this.plugin.metrics.sessionTimer = this.sessionTimer;
 		this.plugin.metrics.sessionActive = this.sessionActive;
 		this.plugin.saveMetrics();
 	}
-} 
+}

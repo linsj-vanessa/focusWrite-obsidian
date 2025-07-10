@@ -2,7 +2,7 @@ import { App, Plugin, PluginSettingTab, Setting, WorkspaceLeaf, ItemView, TFile,
 import { WritingDashboardView } from './WritingDashboardView';
 
 export const WRITING_DASHBOARD_VIEW_TYPE = 'writing-dashboard-view';
-export const DASHBOARD_FILENAME = '📊 Dashboard de Escrita.md';
+export const DASHBOARD_FILENAME = 'Focus Write';
 
 interface WritingMetrics {
 	dailyGoal: number;
@@ -18,6 +18,7 @@ interface WritingMetrics {
 	sessionTimer?: number;
 	sessionActive?: boolean;
 	dailyFocus?: string; // foco do dia
+	totalFocusTime?: number; // tempo total focado acumulado
 }
 
 // Função utilitária debounce
@@ -144,6 +145,7 @@ export default class FocusWritePlugin extends Plugin {
 			sessionTimer: savedData?.sessionTimer ?? 0,
 			sessionActive: savedData?.sessionActive ?? false,
 			dailyFocus: savedData?.dailyFocus ?? '',
+			totalFocusTime: savedData?.totalFocusTime ?? 0,
 		};
 
 		// Calcular métricas iniciais
@@ -423,6 +425,15 @@ export default class FocusWritePlugin extends Plugin {
 	async updateDailyFocus(focus: string): Promise<void> {
 		this.metrics.dailyFocus = focus;
 		await this.saveMetrics();
+	}
+
+	async addToTotalFocusTime(seconds: number): Promise<void> {
+		this.metrics.totalFocusTime = (this.metrics.totalFocusTime || 0) + seconds;
+		await this.saveMetrics();
+	}
+
+	async getTotalFocusTime(): Promise<number> {
+		return this.metrics.totalFocusTime || 0;
 	}
 
 	async openDailyFocusModal(): Promise<void> {

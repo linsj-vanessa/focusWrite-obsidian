@@ -14,7 +14,7 @@
     "dashboard",
     "productivity"
   ],
-  "author": "Seu Nome",
+  "author": "Vanessa Lins",
   "license": "MIT",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.2.0",

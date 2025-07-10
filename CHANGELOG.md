@@ -5,6 +5,16 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.7] - 2024-01-XX
+
+### Adicionado
+- **Sistema de tempo total focado**: Tempo acumulado que persiste entre sessões
+- **Funcionalidade de reset inteligente**: Adiciona o tempo atual ao total antes de zerar
+
+### Alterado
+- **Painel de tempo focado**: Agora mostra o tempo total acumulado de todas as sessões
+- **Comportamento do reset**: O botão reset agora preserva o tempo na contagem total
+
 ## [1.0.6] - 2024-01-XX
 
 ### Adicionado
