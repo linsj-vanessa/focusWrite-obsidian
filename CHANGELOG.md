@@ -5,6 +5,21 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.4] - 2024-01-XX
+
+### Corrigido
+- **Painel de tempo focado**: Agora mostra apenas o tempo total acumulado, sem controles de timer
+- **Layout simplificado**: Removidos botões de iniciar/pausar/reset do painel de tempo focado
+
+## [1.0.3] - 2024-01-XX
+
+### Adicionado
+- **Modal de Foco do Dia**: Novo modal para definir o foco diário de escrita
+- **Seleção de notas**: Possibilidade de selecionar notas existentes como foco do dia
+- **Exibição do foco**: Seção no dashboard que mostra o foco definido para o dia
+- **Botão de ação**: Botão "🎯 Definir Foco do Dia" no painel de ações rápidas
+- **Persistência**: O foco do dia é salvo e mantido entre sessões
+
 ## [1.0.2] - 2024-01-XX
 
 ### Adicionado

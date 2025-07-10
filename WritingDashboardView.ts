@@ -131,21 +131,17 @@ export class WritingDashboardView extends ItemView {
 			<div class="fw-card-footer">Tempo total cronometrado</div>
 		`;
 
-		// Seção combinada: Tempo Focado + Ações Rápidas
+		// Seção combinada: Tempo Total Focado + Ações Rápidas
 		const combinedSection = container.createDiv('combined-section');
 		
-		// Painel de Tempo Focado (lado esquerdo)
+		// Painel de Tempo Total Focado (lado esquerdo)
 		const focusTimePanel = combinedSection.createDiv('focus-time-panel');
-		focusTimePanel.createEl('h3', { text: 'Tempo Focado' });
+		focusTimePanel.createEl('h3', { text: 'Tempo Total Focado' });
 		const focusTimeContent = focusTimePanel.createDiv('focus-time-content');
 		focusTimeContent.innerHTML = `
 			<div class="focus-time-display">
 				<div class="focus-time-main">${this.formatTime(this.sessionTimer)}</div>
-				<div class="focus-time-label">Tempo total cronometrado</div>
-			</div>
-			<div class="focus-time-controls">
-				<button id="fw-timer-start-focus" class="focus-timer-btn">${this.sessionActive ? 'Pausar' : 'Iniciar'}</button>
-				<button id="fw-timer-reset-focus" class="focus-timer-btn">Reset</button>
+				<div class="focus-time-label">Tempo total acumulado</div>
 			</div>
 		`;
 		
@@ -182,23 +178,35 @@ export class WritingDashboardView extends ItemView {
 			await this.plugin.countAllActiveWords();
 			this.renderDashboard(container);
 		});
+
+		// Botão para definir foco do dia
+		const setFocusBtn = actionsGrid.createEl('button', {
+			text: '🎯 Definir Foco do Dia',
+			cls: 'action-button'
+		});
+		setFocusBtn.addEventListener('click', async () => {
+			await this.plugin.openDailyFocusModal();
+		});
 		
-		// Adicionar event listeners para os botões do timer focado
-		setTimeout(() => {
-			document.getElementById('fw-timer-start-focus')?.addEventListener('click', () => {
-				if (this.sessionActive) {
-					this.pauseSessionTimer();
-					document.getElementById('fw-timer-start-focus')!.textContent = 'Iniciar';
-				} else {
-					this.startSessionTimer();
-					document.getElementById('fw-timer-start-focus')!.textContent = 'Pausar';
-				}
+
+
+		// Seção do foco do dia
+		if (this.plugin.metrics.dailyFocus) {
+			const focusSection = container.createDiv('focus-section');
+			focusSection.createEl('h3', { text: '🎯 Foco do Dia' });
+			const focusContent = focusSection.createDiv('focus-content');
+			
+			const focusText = focusContent.createDiv('focus-text');
+			focusText.textContent = this.plugin.metrics.dailyFocus;
+			
+			const editBtn = focusContent.createEl('button', {
+				text: 'Editar',
+				cls: 'focus-edit-btn'
 			});
-			document.getElementById('fw-timer-reset-focus')?.addEventListener('click', () => {
-				this.resetSessionTimer();
-				document.getElementById('fw-timer-start-focus')!.textContent = 'Iniciar';
+			editBtn.addEventListener('click', async () => {
+				await this.plugin.openDailyFocusModal();
 			});
-		}, 0);
+		}
 
 		// Seção de histórico recente
 		const historySection = container.createDiv('history-section');
@@ -444,29 +452,7 @@ export class WritingDashboardView extends ItemView {
 				font-weight: 500;
 			}
 			
-			.focus-time-controls {
-				display: flex;
-				gap: 0.5em;
-				justify-content: center;
-			}
-			
-			.focus-timer-btn {
-				padding: 0.6em 1.2em;
-				border-radius: 0.6em;
-				border: none;
-				background: var(--background-modifier-border);
-				color: var(--text-normal);
-				font-weight: 600;
-				cursor: pointer;
-				transition: all 0.2s ease;
-				font-size: 0.9em;
-			}
-			
-			.focus-timer-btn:hover {
-				background: var(--interactive-accent);
-				color: var(--text-on-accent);
-				transform: translateY(-1px);
-			}
+
 
 			.actions-section {
 				margin-bottom: 2vw;
@@ -577,6 +563,57 @@ export class WritingDashboardView extends ItemView {
 				background: var(--background-modifier-hover);
 				border-radius: 0.7em;
 				border: 2px dashed var(--background-modifier-border);
+			}
+
+			.focus-section {
+				margin-bottom: 2vw;
+				padding: 1.2em 1em;
+				background: linear-gradient(135deg, var(--background-secondary) 0%, var(--background-modifier-border) 100%);
+				border-radius: 1em;
+				box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
+				border: 1px solid var(--background-modifier-border);
+			}
+
+			.focus-section h3 {
+				margin: 0 0 1em 0;
+				color: var(--text-normal);
+				font-size: 1.1em;
+				font-weight: 700;
+			}
+
+			.focus-content {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 1em;
+			}
+
+			.focus-text {
+				flex: 1;
+				padding: 0.8em;
+				background: var(--background-primary);
+				border-radius: 0.5em;
+				border: 1px solid var(--background-modifier-border);
+				color: var(--text-normal);
+				font-size: 0.95em;
+				line-height: 1.4;
+			}
+
+			.focus-edit-btn {
+				padding: 0.5em 1em;
+				border-radius: 0.5em;
+				border: none;
+				background: var(--interactive-accent);
+				color: var(--text-on-accent);
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.2s ease;
+				font-size: 0.9em;
+			}
+
+			.focus-edit-btn:hover {
+				background: var(--interactive-accent-hover);
+				transform: translateY(-1px);
 			}
 
 			/* Header estilo writer-dashboard */

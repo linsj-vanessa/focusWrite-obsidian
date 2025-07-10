@@ -17,6 +17,7 @@ interface WritingMetrics {
 	projectName?: string;
 	sessionTimer?: number;
 	sessionActive?: boolean;
+	dailyFocus?: string; // foco do dia
 }
 
 // Função utilitária debounce
@@ -142,6 +143,7 @@ export default class FocusWritePlugin extends Plugin {
 			projectName: savedData?.projectName ?? 'Meu Projeto',
 			sessionTimer: savedData?.sessionTimer ?? 0,
 			sessionActive: savedData?.sessionActive ?? false,
+			dailyFocus: savedData?.dailyFocus ?? '',
 		};
 
 		// Calcular métricas iniciais
@@ -418,9 +420,308 @@ export default class FocusWritePlugin extends Plugin {
 		await this.saveMetrics();
 	}
 
+	async updateDailyFocus(focus: string): Promise<void> {
+		this.metrics.dailyFocus = focus;
+		await this.saveMetrics();
+	}
+
+	async openDailyFocusModal(): Promise<void> {
+		const modal = new DailyFocusModal(this.app, this);
+		modal.open();
+	}
+
 	// Adiciona método para emitir evento customizado
 	emitMetricsUpdated() {
 		window.dispatchEvent(new CustomEvent('dashboard-metrics-updated'));
+	}
+}
+
+class DailyFocusModal {
+	plugin: FocusWritePlugin;
+	private focusInput: HTMLTextAreaElement;
+	private fileSuggestions: HTMLDivElement;
+	private modalEl: HTMLDivElement;
+	private overlayEl: HTMLDivElement;
+
+	constructor(app: App, plugin: FocusWritePlugin) {
+		this.plugin = plugin;
+	}
+
+	open() {
+		this.createModal();
+	}
+
+	private createModal() {
+		// Criar overlay
+		this.overlayEl = document.createElement('div');
+		this.overlayEl.className = 'daily-focus-modal-overlay';
+		
+		// Criar modal
+		this.modalEl = document.createElement('div');
+		this.modalEl.className = 'daily-focus-modal';
+		
+		// Título do modal
+		this.modalEl.createEl('h2', { text: 'Definir Foco do Dia' });
+
+		// Descrição
+		this.modalEl.createEl('p', { 
+			text: 'Digite o que você quer focar hoje ou selecione uma nota existente:',
+			cls: 'modal-description'
+		});
+
+		// Campo de texto para digitar o foco
+		const textSection = this.modalEl.createDiv('focus-text-section');
+		textSection.createEl('label', { text: 'Digite seu foco:', cls: 'focus-label' });
+		
+		this.focusInput = textSection.createEl('textarea', {
+			placeholder: 'Ex: Escrever o capítulo 3 do romance, Revisar o artigo sobre marketing...',
+			cls: 'focus-textarea'
+		}) as HTMLTextAreaElement;
+		
+		// Preencher com valor atual se existir
+		if (this.plugin.metrics.dailyFocus) {
+			this.focusInput.value = this.plugin.metrics.dailyFocus;
+		}
+
+		// Seção de sugestões de arquivos
+		const suggestionsSection = this.modalEl.createDiv('focus-suggestions-section');
+		suggestionsSection.createEl('h3', { text: 'Ou selecione uma nota:' });
+		
+		this.fileSuggestions = suggestionsSection.createDiv('file-suggestions');
+		this.populateFileSuggestions();
+
+		// Botões de ação
+		const buttonContainer = this.modalEl.createDiv('modal-buttons');
+		
+		const saveButton = buttonContainer.createEl('button', {
+			text: 'Salvar Foco',
+			cls: 'modal-button save-button'
+		});
+		saveButton.addEventListener('click', async () => {
+			const focus = this.focusInput.value.trim();
+			if (focus) {
+				await this.plugin.updateDailyFocus(focus);
+				new Notice('Foco do dia definido com sucesso!');
+				this.close();
+			} else {
+				new Notice('Por favor, digite um foco para o dia.');
+			}
+		});
+
+		const cancelButton = buttonContainer.createEl('button', {
+			text: 'Cancelar',
+			cls: 'modal-button cancel-button'
+		});
+		cancelButton.addEventListener('click', () => {
+			this.close();
+		});
+
+		// Adicionar ao DOM
+		this.overlayEl.appendChild(this.modalEl);
+		document.body.appendChild(this.overlayEl);
+		
+		// Adicionar estilos
+		this.addModalStyles();
+		
+		// Focar no input
+		setTimeout(() => {
+			this.focusInput.focus();
+		}, 100);
+	}
+
+	close() {
+		if (this.overlayEl && this.overlayEl.parentNode) {
+			this.overlayEl.parentNode.removeChild(this.overlayEl);
+		}
+	}
+
+	private populateFileSuggestions() {
+		const files = this.plugin.app.vault.getMarkdownFiles();
+		const recentFiles = files
+			.filter(file => !file.path.includes('📊 Dashboard de Escrita.md'))
+			.slice(0, 10); // Mostrar apenas os 10 mais recentes
+
+		if (recentFiles.length === 0) {
+			this.fileSuggestions.createEl('p', { 
+				text: 'Nenhuma nota encontrada.',
+				cls: 'no-files-message'
+			});
+			return;
+		}
+
+		recentFiles.forEach(file => {
+			const fileItem = this.fileSuggestions.createDiv('file-suggestion-item');
+			const fileName = fileItem.createEl('span', { 
+				text: file.basename,
+				cls: 'file-name'
+			});
+			const filePath = fileItem.createEl('span', { 
+				text: file.path,
+				cls: 'file-path'
+			});
+			
+			fileItem.addEventListener('click', () => {
+				this.focusInput.value = `Trabalhar em: ${file.basename}`;
+			});
+		});
+	}
+
+	private addModalStyles() {
+		const style = document.createElement('style');
+		style.textContent = `
+			.daily-focus-modal-overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.5);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				z-index: 1000;
+			}
+
+			.daily-focus-modal {
+				background: var(--background-primary);
+				border-radius: 1em;
+				padding: 2em;
+				max-width: 600px;
+				width: 90%;
+				max-height: 80vh;
+				overflow-y: auto;
+				box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+				border: 1px solid var(--background-modifier-border);
+			}
+
+			.daily-focus-modal h2 {
+				margin: 0 0 1em 0;
+				color: var(--text-normal);
+				font-size: 1.5em;
+				font-weight: 700;
+			}
+
+			.modal-description {
+				color: var(--text-muted);
+				margin-bottom: 1.5em;
+				font-size: 0.95em;
+			}
+
+			.focus-text-section {
+				margin-bottom: 2em;
+			}
+
+			.focus-label {
+				display: block;
+				margin-bottom: 0.5em;
+				font-weight: 600;
+				color: var(--text-normal);
+			}
+
+			.focus-textarea {
+				width: 100%;
+				min-height: 100px;
+				padding: 0.8em;
+				border: 2px solid var(--background-modifier-border);
+				border-radius: 0.5em;
+				background: var(--background-primary);
+				color: var(--text-normal);
+				font-family: inherit;
+				font-size: 0.95em;
+				resize: vertical;
+				transition: border-color 0.2s ease;
+				box-sizing: border-box;
+			}
+
+			.focus-textarea:focus {
+				outline: none;
+				border-color: var(--interactive-accent);
+			}
+
+			.focus-suggestions-section h3 {
+				margin: 0 0 1em 0;
+				font-size: 1em;
+				color: var(--text-normal);
+			}
+
+			.file-suggestions {
+				max-height: 200px;
+				overflow-y: auto;
+				border: 1px solid var(--background-modifier-border);
+				border-radius: 0.5em;
+				background: var(--background-secondary);
+			}
+
+			.file-suggestion-item {
+				padding: 0.8em;
+				border-bottom: 1px solid var(--background-modifier-border);
+				cursor: pointer;
+				transition: background-color 0.2s ease;
+				display: flex;
+				flex-direction: column;
+				gap: 0.2em;
+			}
+
+			.file-suggestion-item:hover {
+				background: var(--background-modifier-hover);
+			}
+
+			.file-suggestion-item:last-child {
+				border-bottom: none;
+			}
+
+			.file-name {
+				font-weight: 600;
+				color: var(--text-normal);
+			}
+
+			.file-path {
+				font-size: 0.85em;
+				color: var(--text-muted);
+			}
+
+			.modal-buttons {
+				display: flex;
+				gap: 1em;
+				justify-content: flex-end;
+				margin-top: 2em;
+			}
+
+			.modal-button {
+				padding: 0.7em 1.5em;
+				border-radius: 0.5em;
+				border: none;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.2s ease;
+			}
+
+			.save-button {
+				background: var(--interactive-accent);
+				color: var(--text-on-accent);
+			}
+
+			.save-button:hover {
+				background: var(--interactive-accent-hover);
+			}
+
+			.cancel-button {
+				background: var(--background-modifier-border);
+				color: var(--text-normal);
+			}
+
+			.cancel-button:hover {
+				background: var(--background-modifier-hover);
+			}
+
+			.no-files-message {
+				padding: 1em;
+				text-align: center;
+				color: var(--text-muted);
+				font-style: italic;
+			}
+		`;
+		document.head.appendChild(style);
 	}
 }
 
