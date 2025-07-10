@@ -5,6 +5,12 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.8] - 2024-01-XX
+
+### Alterado
+- **Painel de ações rápidas simplificado**: Removidos botões "Criar Página Fixa", "Contar Palavras" e "Contar Todas as Palavras"
+- **Interface mais limpa**: Mantido apenas o botão "Definir Foco do Dia" nas ações rápidas
+
 ## [1.0.7] - 2024-01-XX
 
 ### Adicionado

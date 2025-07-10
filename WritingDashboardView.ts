@@ -153,35 +153,6 @@ export class WritingDashboardView extends ItemView {
 		actionsPanel.createEl('h3', { text: 'Ações Rápidas' });
 		const actionsGrid = actionsPanel.createDiv('actions-grid');
 
-		// Botão para criar página fixa
-		const createPageBtn = actionsGrid.createEl('button', {
-			text: '📄 Criar Página Fixa',
-			cls: 'action-button'
-		});
-		createPageBtn.addEventListener('click', async () => {
-			await this.plugin.createFixedDashboardPage();
-		});
-
-		// Botão para contar palavras
-		const countWordsBtn = actionsGrid.createEl('button', {
-			text: '🔢 Contar Palavras',
-			cls: 'action-button'
-		});
-		countWordsBtn.addEventListener('click', async () => {
-			await this.plugin.countTodayWords();
-			await this.renderDashboard(container);
-		});
-
-		// Botão para contar todas as palavras
-		const countAllWordsBtn = actionsGrid.createEl('button', {
-			text: '📊 Contar Todas as Palavras',
-			cls: 'action-button'
-		});
-		countAllWordsBtn.addEventListener('click', async () => {
-			await this.plugin.countAllActiveWords();
-			await this.renderDashboard(container);
-		});
-
 		// Botão para definir foco do dia
 		const setFocusBtn = actionsGrid.createEl('button', {
 			text: '🎯 Definir Foco do Dia',
